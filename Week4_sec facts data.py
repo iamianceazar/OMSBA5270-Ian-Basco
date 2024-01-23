@@ -1,4 +1,4 @@
-# import the modules
+# import all modules
 
 import pandas as pd
 import requests
@@ -27,7 +27,7 @@ print(companyCIK)
 cik = companyCIK[99:100].cik_str.iloc[0]
 companyTitle = companyCIK[99:100].title.iloc[0]
 print(companyTitle, cik)
-#
+
 
 # get all companies facts data
 companyFacts = requests.get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json", headers=headers)
