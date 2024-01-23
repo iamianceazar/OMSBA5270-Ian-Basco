@@ -24,8 +24,8 @@ companyCIK['cik_str'] = companyCIK['cik_str'].astype(str).str.zfill(10)
 print(companyCIK)
 
 # selecting CIK entry # 100
-cik = companyCIK[99:100].cik_str.iloc[0]
-companyTitle = companyCIK[99:100].title.iloc[0]
+cik = companyCIK[12:13].cik_str.iloc[0]
+companyTitle = companyCIK[12:13].title.iloc[0]
 print(companyTitle, cik)
 
 
