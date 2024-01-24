@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import plotly.express as px
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 pd.set_option('display.width', 320)
 pd.set_option('display.max_columns', 15)
@@ -73,12 +74,23 @@ merge_dataframes['ratio_assets_liabilities'] = merge_dataframes['val_y'] / merge
 print(merge_dataframes)
 
 # import plotly.express package and graph the data
-pd.options.plotting.backend = "plotly"
-graph = merge_dataframes.plot(x = "filed_x",
-                              y = "ratio_assets_liabilities",
-                              title = companyTitle + " ratio of assets and liabilities",
-                              labels={"filed_x": "Quarter End Data",
-                                      "ratio_assets_liabilities": "Ratio of assets and liabilities"}
-                              )
-graph.show()
+# pd.options.plotting.backend = "plotly"
+# graph = merge_dataframes.plot(x = "filed_x",
+#                               y = "ratio_assets_liabilities",
+#                               title = companyTitle + " ratio of assets and liabilities",
+#                               labels={"filed_x": "Quarter End Data",
+#                                       "ratio_assets_liabilities": "Ratio of assets and liabilities"}
+#                               )
+# graph.show()
 
+heatmap_dataframe = merge_dataframes[['ratio_assets_liabilities', 'val_x', 'val_y']]
+print(heatmap_dataframe)
+
+corr = heatmap_dataframe.corr()
+
+# create the heatmap
+
+plt.figure(figsize=(8,6))
+sns.heatmap(corr, annot = True, cmap = 'RdBu')
+plt.title("Correlation Heatmap")
+plt.show()
