@@ -43,23 +43,24 @@ marketingExpense_df = marketingExpense_df[marketingExpense_df.frame.notna()]
 marketingExpense_df_filtered = marketingExpense_df[marketingExpense_df['form'] == '10-K']
 marketingExpense_df_filtered = marketingExpense_df_filtered.rename(columns={'val' : 'expense'})
 print(f"Average marketing expense: ", marketingExpense_df_filtered.loc[:,'expense'].mean())
-
+print(f"Median marketing expense: ", marketingExpense_df_filtered.loc[:,'expense'].median())
 # Graph to show the marketing expense per year
-# pd.options.plotting.backend = "plotly"
-# graph_marketing = marketingExpense_df_filtered.plot(x = "end",
-#                                                     y = "expense",
-#                                                     title = companyTitle + f" marketing expense from 2011 to 2016 ",
-#                                                     labels={"end": "Year",
-#                                                             "expense": "expense"}
-#                                                     )
-# graph_marketing.show()
+pd.options.plotting.backend = "plotly"
+graph_marketing = marketingExpense_df_filtered.plot(x = "end",
+                                                    y = "expense",
+                                                    title = companyTitle + f" marketing expense from 2011 to 2016 ",
+                                                    labels={"end": "Year",
+                                                            "expense": "expense"}
+                                                    )
+graph_marketing.show()
 
 # Average net income loss calculation
 NetIncomeLoss = pd.DataFrame.from_dict(companyFacts.json()['facts']['us-gaap']['NetIncomeLoss']['units']['USD'])
 NetIncomeLoss = NetIncomeLoss[NetIncomeLoss.frame.notna()]
 NetIncomeLoss_df_filtered = NetIncomeLoss[NetIncomeLoss['form'] == '10-K']
 NetIncomeLoss_df_filtered = NetIncomeLoss_df_filtered.rename(columns={'val' : 'loss'})
-print(f"Average net income loss from: ", NetIncomeLoss_df_filtered.loc[:,'loss'].mean())
+print(f"Average net income loss : ", NetIncomeLoss_df_filtered.loc[:,'loss'].mean())
+print(f"Median net income loss : ", NetIncomeLoss_df_filtered.loc[:,'loss'].median())
 
 # Average net sales revenue calculation
 SalesRevenueNet_df = pd.DataFrame.from_dict(companyFacts.json()['facts']['us-gaap']['SalesRevenueNet']['units']['USD'])
@@ -67,16 +68,20 @@ SalesRevenueNet_df = SalesRevenueNet_df[SalesRevenueNet_df.frame.notna()]
 SalesRevenueNet_df_filtered = SalesRevenueNet_df[SalesRevenueNet_df['form'] == '10-K']
 SalesRevenueNet_df_filtered = SalesRevenueNet_df_filtered.rename(columns={'val' : 'revenue'})
 print(f"Average net sales revenue: ", SalesRevenueNet_df_filtered.loc[:,'revenue'].mean())
+print(f"Median net income loss : ", SalesRevenueNet_df_filtered.loc[:,'revenue'].median())
 
 # Merging sales revenue and income loss
 merge_df = pd.merge(SalesRevenueNet_df_filtered, NetIncomeLoss_df_filtered, on ='accn')
+merge_df = merge_df.groupby(['fy_x'])[['revenue', 'loss']].sum()
+print(merge_df)
 
 # Graph to show the relationship between sales revenue and income loss visually.
-# pd.options.plotting.backend = "plotly"
-# graph_net = merge_df.plot(x = "fy_x",
-#                       y = ['revenue', 'loss'],
-#                       title = companyTitle + " net income loss VS net sales revenue")
-# graph_net.show()
+pd.options.plotting.backend = "plotly"
+graph_net = merge_df.plot(y = ['revenue', 'loss'],
+                          title = companyTitle + " net income loss VS net sales revenue")
+graph_net.show()
+
+
 
 # Financial Ratio Analysis
 # D/E Ratio calculation
@@ -99,7 +104,7 @@ merge_dataframes = pd.merge(debt_df_filtered, equity_df_filtered, on = 'accn')
 
 # calculating ratio of debt to equity (debt ratio)
 merge_dataframes['debt-to-equity ratio'] = merge_dataframes['debt'] / merge_dataframes['equity']
-print(merge_dataframes[['filed_x', 'debt-to-equity ratio']])
+print(merge_dataframes.groupby(['end_x'])['debt-to-equity ratio'].mean())
 
 # Current Ratio calculation
 
@@ -121,7 +126,7 @@ merge_currentRatio_dataframes = pd.merge(currentAssets_df_filtered, currentLiabi
 
 # calculating current ratio
 merge_currentRatio_dataframes['current ratio'] = merge_currentRatio_dataframes['current assets'] / merge_currentRatio_dataframes['current liabilities']
-print(merge_currentRatio_dataframes[['end_x','current ratio']])
+print(merge_currentRatio_dataframes.groupby(['end_x'])['current ratio'].mean())
 
 
 # Quick Ratio (acid test) calculation
@@ -154,7 +159,6 @@ merge_quickRatio_dataframes['quick ratio'] = (merge_quickRatio_dataframes['curre
                                              / merge_currentRatio_dataframes['current liabilities']
 
 # merge_quickRatio_dataframes = merge_dataframes.drop(merge_dataframes.columns[1:-1], axis = 1)
-
-
 print(merge_quickRatio_dataframes[['end_x', 'quick ratio']])
+print(merge_quickRatio_dataframes.groupby(['end_x'])['quick ratio'].mean())
 
