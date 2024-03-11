@@ -1,5 +1,5 @@
 # import all modules
-
+import matplotlib.pyplot as plt
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 import requests
@@ -26,15 +26,6 @@ companyCIK = pd.DataFrame.from_dict(companyTickers.json(), orient = 'index')
 # adding zero's to CIK
 companyCIK['cik_str'] = companyCIK['cik_str'].astype(str).str.zfill(10)
 
-# # selecting CIK (Philip Morris)
-# a = 78 #78 79
-# b = 79
-# cik = companyCIK[a:b].cik_str.iloc[0]
-
-# tickerSymbol = companyCIK[a:b].ticker.iloc[0]
-# print(companyTitle, "\n", "Ticker:", tickerSymbol, "\n", "CIK:", cik)
-# # cik = "0001413329"
-
 company_information = companyCIK[companyCIK['ticker'] == stock_symbol]
 cik = company_information['cik_str'].values[0]
 companyTitle = company_information.title.iloc[0]
@@ -52,17 +43,16 @@ dividends_df = pd.DataFrame.from_dict(companyFacts.json()['facts']['us-gaap']['P
 dividends_df = dividends_df[dividends_df.frame.notna()]
 dividend_df_filtered = dividends_df[dividends_df['form'] == '10-K']
 dividend_df_filtered = dividend_df_filtered.rename(columns={'val' : 'dividend distribution'})
-print(dividend_df_filtered)
+print(dividend_df_filtered[['end','dividend distribution']])
 
-# pd.options.plotting.backend = "plotly"
-# graph_marketing = dividend_df_filtered.plot(x = "end",
-#                                             y = "dividend distribution",
-#                                             title = companyTitle + f" dividend payments from 2007 to 2023",
-#                                             labels={"end": "Year",
-#                                                     "dividend distribution": "Dividend distribution (USD)"}
-#                                             )
-# graph_marketing.show()
-
+pd.options.plotting.backend = "plotly"
+graph_marketing = dividend_df_filtered.plot(x = "end",
+                                            y = "dividend distribution",
+                                            title = companyTitle + f" dividend payments from 2007 to 2023",
+                                            labels={"end": "Year",
+                                                    "dividend distribution": "Dividend distribution (USD)"}
+                                            )
+graph_marketing.show()
 
 salesRevenue_df = pd.DataFrame.from_dict(companyFacts.json()['facts']['us-gaap']['SalesRevenueNet']['units']['USD'])
 salesRevenue_df = salesRevenue_df[salesRevenue_df.frame.notna()]
@@ -72,14 +62,14 @@ grouped_salesRevenue = salesRevenue_df_filtered.groupby('fy')['sales revenue'].s
 # print(salesRevenue_df_filtered)
 print(grouped_salesRevenue)
 #
-# pd.options.plotting.backend = "plotly"
-# graph_marketing = grouped_salesRevenue.plot(x = "fy",
-#                                             y = "sales revenue",
-#                                             title = companyTitle + f" sales revenue from 2009 to 2017",
-#                                             labels={"fy": "Year",
-#                                                     "sales revenue": "Sales revenue (USD)"}
-#                                             )
-# graph_marketing.show()
+pd.options.plotting.backend = "plotly"
+graph_marketing = grouped_salesRevenue.plot(x = "fy",
+                                            y = "sales revenue",
+                                            title = companyTitle + f" sales revenue from 2009 to 2017",
+                                            labels={"fy": "Year",
+                                                    "sales revenue": "Sales revenue (USD)"}
+                                            )
+graph_marketing.show()
 
 ### D/E Ratio calculation
 debt_df = pd.DataFrame.from_dict(companyFacts.json()['facts']['us-gaap']['Liabilities']['units']['USD'])
@@ -232,15 +222,15 @@ form_4_filings = form_4_filings.drop(columns=['items',
                                               'isInlineXBRL',
                                               'primaryDocument',
                                               'primaryDocDescription'])
-print(form_4_filings)
+print(form_4_filings[['filingDate','stock price',  'form']])
 
 # graph filing vs stock price
-# pd.options.plotting.backend = "plotly"
-# graph = form_4_filings.plot(x = 'filingDate',
-#                             y = 'stock price',
-#                             title = f"Stock Price vs. Filing Date for {companyTitle} (NYSE: {tickerSymbol})",
-#                             labels = {'stock price':'Stock Price (USD)', 'filingDate':"Filing Date"})
-# graph.show()
+pd.options.plotting.backend = "plotly"
+graph = form_4_filings.plot(x = 'filingDate',
+                            y = 'stock price',
+                            title = f"Stock Price vs. Filing Date for {companyTitle} (NYSE: {tickerSymbol})",
+                            labels = {'stock price':'Stock Price (USD)', 'filingDate':"Filing Date"})
+graph.show()
 
 allFilings_cor = pd.DataFrame.from_dict(companyFiling.json()['filings']['recent'])
 filtered_df = allFilings_cor[allFilings_cor['form'] == '10-Q']
@@ -311,16 +301,16 @@ melted_df['Days After'] = melted_df['Days After'].astype(str) + ' days after'
 
 print(melted_df)
 #
-# fig = px.line(melted_df, x='Days After', y= 'Stock Price',
-#               title= f'Stock Price Evolution After Filing Dates {stock_symbol} {start_date} <-> {end_date}',
-#               labels={'Days After': 'Period After Filing', 'reportDate': 'Report Date', 'Stock Price': 'Stock Price ($)'})
-#
-# fig.update_layout(
-#         xaxis_title='Report Date',
-#         yaxis_title='Stock Price ($)',
-#         legend_title='Time After Filing',
-#
-# )
-#
-#
-# fig.show()
+fig = px.line(melted_df, x='Days After', y= 'Stock Price',
+              title= f'Stock Price Evolution After Filing Dates {stock_symbol} {start_date} <-> {end_date}',
+              labels={'Days After': 'Period After Filing', 'reportDate': 'Report Date', 'Stock Price': 'Stock Price ($)'})
+
+fig.update_layout(
+        xaxis_title='Report Date',
+        yaxis_title='Stock Price ($)',
+        legend_title='Time After Filing',
+
+)
+
+
+fig.show()
